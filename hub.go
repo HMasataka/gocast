@@ -1,8 +1,10 @@
 package gocast
 
+import "io"
+
 type Client interface {
-	Send(b []byte)
-	Close()
+	io.WriteCloser
+	Error(err error)
 }
 
 type hub struct {
@@ -36,11 +38,16 @@ func (h *hub) Run() {
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
-				client.Close()
+
+				if err := client.Close(); err != nil {
+					client.Error(err)
+				}
 			}
 		case message := <-h.broadcast:
 			for client := range h.clients {
-				client.Send(message)
+				if _, err := client.Write(message); err != nil {
+					client.Error(err)
+				}
 			}
 		}
 	}

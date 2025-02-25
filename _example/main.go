@@ -7,13 +7,24 @@ import (
 	"github.com/HMasataka/gocast"
 )
 
-type client struct{}
-
-func (c client) Send(message []byte) {
-	fmt.Println(string(message))
+func NewClient() gocast.Client {
+	return client{}
 }
 
-func (c client) Close() {}
+type client struct{}
+
+func (c client) Write(message []byte) (int, error) {
+	fmt.Println(string(message))
+	return len(message), nil
+}
+
+func (c client) Close() error {
+	return nil
+}
+
+func (c client) Error(err error) {
+	fmt.Println(err)
+}
 
 func main() {
 	c := client{}
