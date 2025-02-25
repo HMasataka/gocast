@@ -5,7 +5,7 @@ type Client interface {
 	Close()
 }
 
-type Hub struct {
+type hub struct {
 	// Registered clients.
 	clients map[Client]bool
 
@@ -19,8 +19,8 @@ type Hub struct {
 	unregister chan Client
 }
 
-func newHub() *Hub {
-	return &Hub{
+func NewHub() *hub {
+	return &hub{
 		broadcast:  make(chan []byte),
 		register:   make(chan Client),
 		unregister: make(chan Client),
@@ -28,7 +28,7 @@ func newHub() *Hub {
 	}
 }
 
-func (h *Hub) Run() {
+func (h *hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
@@ -46,14 +46,14 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) Broadcast(message []byte) {
+func (h *hub) Broadcast(message []byte) {
 	h.broadcast <- message
 }
 
-func (h *Hub) Register(client Client) {
+func (h *hub) Register(client Client) {
 	h.register <- client
 }
 
-func (h *Hub) Unregister(client Client) {
+func (h *hub) Unregister(client Client) {
 	h.unregister <- client
 }
